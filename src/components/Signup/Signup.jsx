@@ -20,6 +20,18 @@ const Signup = () => {
         console.log(email, password)
         // reset error
         setRegisterError(''); 
+        setSuccess('');
+
+        if (password.length < 6) {
+            setRegisterError('Password should be at least 6 characters');
+            return;
+        }
+
+        else if (!/[A-Z]/.test(password)){
+            setRegisterError('Your password should have at least one uppercase characters')
+            return;
+        }
+
 
         // create user
         createUserWithEmailAndPassword(auth, email, password)

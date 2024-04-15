@@ -1,13 +1,14 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import auth from "../../Firebase/Firbase.config";
 import { useState } from "react";
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 
 const HeroRegister = () => {
 
     const [registerError, setRegisterError] = useState('');
     const [success, setSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState('');
 
     const handleRegister = e => {
         e.preventDefault();
@@ -16,25 +17,30 @@ const HeroRegister = () => {
         console.log(email, password)
 
         // reset error
-        setRegisterError(''); 
+        setRegisterError('');
         setSuccess('');
-        
-        if(password.length < 6){
+
+        if (password.length < 6) {
             setRegisterError('Password should be at least 6 characters');
             return;
         }
 
+        else if (!/[A-Z]/.test(password)) {
+            setRegisterError('Your password should have at least one uppercase characters')
+            return;
+        }
 
-         // create user
-         createUserWithEmailAndPassword(auth, email, password)
-         .then(result =>{
-             console.log(result.user);
-             setSuccess('user created successfully')
-         })
-         .catch(error =>{
-             console.error(error);
-             setRegisterError(error.message);
-         })
+
+        // create user
+        createUserWithEmailAndPassword(auth, email, password)
+            .then(result => {
+                console.log(result.user);
+                setSuccess('user created successfully')
+            })
+            .catch(error => {
+                console.error(error);
+                setRegisterError(error.message);
+            })
     }
 
     return (
@@ -57,7 +63,21 @@ const HeroRegister = () => {
                                 <label className="label">
                                     <span className="label-text">Password</span>
                                 </label>
-                                <input type="password" name="password" placeholder="password" className="input input-bordered" required />
+                                <div className="flex">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        placeholder="password"
+                                        className="input input-bordered"
+                                        required
+                                    />
+                                    <span onClick={() => setShowPassword(!showPassword)}>
+                                        {
+                                            showPassword ? <FaEyeSlash></FaEyeSlash> : <FaEye></FaEye>
+                                        }
+                                    </span>
+                                </div>
+
                                 <label className="label">
                                     <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
                                 </label>
