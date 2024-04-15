@@ -1,6 +1,7 @@
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import auth from "../../Firebase/Firbase.config";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 
 
@@ -8,6 +9,7 @@ import { useState } from "react";
 
 const Login = () => {
 
+    const emailRef = useRef(null);
     const [registerError, setRegisterError] = useState('');
     const [success, setSuccess] = useState('');
     const handleLogin = e => {
@@ -24,16 +26,41 @@ const Login = () => {
 
         // add validation
         signInWithEmailAndPassword(auth, email, password)
-        .then(result => {
-            console.log(result.user);
-            setSuccess('user logged in successfully')
-        })
-        .catch(error => {
-            console.error(error);
-            setRegisterError(error.message);
-        })
+            .then(result => {
+                console.log(result.user);
+                if(result.user.emailVerified) {
+                    setSuccess('user logged in successfully')
+                }
+                else{
+                    alert('please verify your email address')
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                setRegisterError(error.message);
+            })
     }
 
+    const handleForgetPassword = () => {
+        const email = emailRef.current.value;
+        if (!email) {
+            console.log('please provide an email', emailRef.current.value)
+            return;
+        }
+        else if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+            console.log('please write a valid email')
+            return;
+        }
+
+        // send validation email 
+        sendPasswordResetEmail(auth, email)
+            .then(() => {
+                alert('please check your email')
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
 
 
     return (
@@ -50,7 +77,13 @@ const Login = () => {
                                 <label className="label">
                                     <span className="label-text">Email</span>
                                 </label>
-                                <input type="email" placeholder="email" className="input input-bordered" name="email" required />
+                                <input
+                                    type="email"
+                                    name="email"
+                                    ref={emailRef}
+                                    placeholder="email"
+                                    className="input input-bordered"
+                                    required />
                             </div>
                             <div className="form-control">
                                 <label className="label">
@@ -58,7 +91,7 @@ const Login = () => {
                                 </label>
                                 <input type="password" placeholder="password" className="input input-bordered" name="password" required />
                                 <label className="label">
-                                    <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
+                                    <a onClick={handleForgetPassword} href="#" className="label-text-alt link link-hover">Forgot password?</a>
                                 </label>
                             </div>
                             <div className="form-control mt-6">
@@ -71,6 +104,9 @@ const Login = () => {
                         {
                             success && <p className="text-green-600 text-center text-2xl">{success}</p>
                         }
+                        <div>
+                            <p className="flex gap-2">New to this Website? Please <Link to="/heroRegister"><h4 className="font-bold right-2 text-emerald-500">Register</h4></Link></p>
+                        </div>
                     </div>
                 </div>
             </div>

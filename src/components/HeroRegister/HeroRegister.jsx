@@ -1,7 +1,9 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import auth from "../../Firebase/Firbase.config";
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { sendEmailVerification } from "firebase/auth/cordova";
 
 
 const HeroRegister = () => {
@@ -12,10 +14,11 @@ const HeroRegister = () => {
 
     const handleRegister = e => {
         e.preventDefault();
+        const name = e.target.name.value;
         const email = e.target.email.value;
         const password = e.target.password.value;
         const accepted = e.target.terms.checked;
-        console.log(email, password, accepted)
+        console.log(name, email, password, accepted)
 
         // reset error
         setRegisterError('');
@@ -42,6 +45,21 @@ const HeroRegister = () => {
             .then(result => {
                 console.log(result.user);
                 setSuccess('user created successfully')
+
+                // update profile
+                updateProfile(result.user, {
+                    displayName: name,
+                    photoURL: "https://example.com/jane-q-user/profile.jpg"
+                })
+                .then( () => console.log('profile updated')) 
+                .catch()
+
+
+                // send email verification
+                sendEmailVerification(result.user)
+                .then( () => {
+                    alert('please check your email and verified your account')
+                })
             })
             .catch(error => {
                 console.error(error);
@@ -61,9 +79,23 @@ const HeroRegister = () => {
                         <form onSubmit={handleRegister}>
                             <div className="form-control">
                                 <label className="label">
+                                    <span className="label-text">Name</span>
+                                </label>
+                                <input type="text"
+                                 placeholder="Your name" 
+                                 name="name" 
+                                 className="input input-bordered" 
+                                 required />
+                            </div>
+                            <div className="form-control">
+                                <label className="label">
                                     <span className="label-text">Email</span>
                                 </label>
-                                <input type="email" placeholder="email" name="email" className="input input-bordered" required />
+                                <input type="email"
+                                 placeholder="email" 
+                                 name="email" 
+                                 className="input input-bordered" 
+                                 required />
                             </div>
                             <div className="form-control">
                                 <label className="label">
@@ -91,7 +123,7 @@ const HeroRegister = () => {
                                 </div>
                                 <br />
                                 <label className="label">
-                                    <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
+                                    <a  href="#" className="label-text-alt link link-hover">Forgot password?</a>
                                 </label>
                             </div>
                             <div className="form-control mt-6">
@@ -104,6 +136,9 @@ const HeroRegister = () => {
                         {
                             success && <p className="text-green-600 text-center text-2xl">{success}</p>
                         }
+                        <div>
+                            <p className="flex gap-2">Already have an account? Please <Link to="/login"><h4 className="font-bold right-2 text-emerald-500">Log in</h4></Link></p>
+                        </div>
                     </div>
                 </div>
             </div>
